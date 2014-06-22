@@ -1,0 +1,26 @@
+language: php
+
+php: 
+  - 5.4
+
+env:
+  global:
+    - RDS_HOSTNAME=127.0.0.1 RDS_USERNAME=shippable RDS_PASSWORD="" RDS_DB_NAME=test RDS_PORT=3306
+    - secure: K7qw2XSFBaW+zEzrs0ODKMQq/Bo9AZqGotCXc50fao+et6WaxEmedlK//MO9JozmPdcxDRq5k8A0pmjTLsMLstkh7PUFLu3Z6xowU2OhMyjQ0pS2J8Hw16SgZ9n2EW+3cps4dIijEzOwjA0Yx5rTOC7F9N8nvr/1l4Yp4i11qgW08cefEKuwiF/ypgrkK5BYJyJreZOEJt3lJ6/aXyXxPPl3X3Z+L+ca9mQmTN6q1wnlEcYLDU5EJtkk87KtOfVyoi/+aOFh49eDpwStSD4zDnygia8eAnCGK/p0XGFJCAwWK1nnFY7aklJrvElD+V/2lbr14TwF0rhmiba6Y6ylnw==
+
+before_script: 
+  - mkdir -p shippable/testresults
+  - mkdir -p shippable/codecoverage
+  - mysql -e 'create database if not exists test;'
+  - mkdir -p ~/.elasticbeanstalk
+  - echo 'AWSAccessKeyId=AKIAJSZ63DTL3Z7KLVEQ' >> ~/.elasticbeanstalk/aws_credential_file
+  - echo 'AWSSecretKey='$AWSSecretKey >> ~/.elasticbeanstalk/aws_credential_file
+
+script:
+  - mkdir -p .elasticbeanstalk
+  - cp config .elasticbeanstalk/
+  - phpunit  --log-junit shippable/testresults/junit.xml --coverage-xml shippable/codecoverage test.php
+
+after_success :
+  - export PATH=$PATH:$PWD/aws/eb/linux/python2.7/ && virtualenv ve && source ve/bin/activate && pip install -r aws/requirements.txt && eb init && eb push
+
