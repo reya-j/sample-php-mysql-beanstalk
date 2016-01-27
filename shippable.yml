@@ -1,7 +1,13 @@
 language: php
+build_image: drydock/u12phpll:tip
+
+services:
+  - mysql
 
 php: 
   - 5.4
+  - 5.5
+  - 5.6
 
 env:
   global:
